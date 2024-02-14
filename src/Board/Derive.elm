@@ -119,4 +119,3 @@ decodeResult errDecoder okDecoder =
 decodeAndMap : Json.Decode.Decoder a -> Json.Decode.Decoder (a -> b) -> Json.Decode.Decoder b
 decodeAndMap =
     Json.Decode.map2 (|>)
-

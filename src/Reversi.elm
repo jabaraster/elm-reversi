@@ -226,12 +226,12 @@ viewInformation bgColor children =
                 keyframes
                     [ ( 0
                       , [ Animations.opacity (int 0)
-                        , Animations.transform [translateY (pct (-100)) ]
+                        , Animations.transform [ translateY (pct -100) ]
                         ]
                       )
-                      , ( 50
+                    , ( 50
                       , [ Animations.opacity (int 0)
-                        , Animations.transform [translateY (pct (-50)) ]
+                        , Animations.transform [ translateY (pct -50) ]
                         ]
                       )
                     , ( 100, [ Animations.opacity (int 100) ] )

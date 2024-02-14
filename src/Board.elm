@@ -257,4 +257,3 @@ reverse stone =
 
         Black ->
             White
-
