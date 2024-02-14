@@ -1,0 +1,20 @@
+{
+  "name": "reversi",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "format": "yarn prettier --write src && yarn elm-format --yes src && yarn elm-format --yes tests",
+    "format-dev": "yarn run format && yarn parcel --port 4333 src/reversi.html",
+    "build": "yarn parcel build src/reversi.html",
+    "test-watch": "yarn elm-test tests/*Tests.elm --watch"
+  },
+  "devDependencies": {
+    "@parcel/transformer-elm": "2.11.0",
+    "elm": "^0.19.1-6",
+    "elm-format": "^0.8.7",
+    "elm-test": "^0.19.1-revision12",
+    "parcel": "^2.11.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  }
+}
