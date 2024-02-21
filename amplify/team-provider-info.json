@@ -1,0 +1,23 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-reversi-dev-152706-authRole",
+      "UnauthRoleArn": "arn:aws:iam::195957709288:role/amplify-reversi-dev-152706-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::195957709288:role/amplify-reversi-dev-152706-authRole",
+      "Region": "ap-northeast-1",
+      "DeploymentBucketName": "amplify-reversi-dev-152706-deployment",
+      "UnauthRoleName": "amplify-reversi-dev-152706-unauthRole",
+      "StackName": "amplify-reversi-dev-152706",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:195957709288:stack/amplify-reversi-dev-152706/1a40c6d0-cb02-11ee-a01b-0ef0a7b32a81",
+      "AmplifyAppId": "d2wivueq9edy39"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d2wivueq9edy39",
+          "type": "manual"
+        }
+      }
+    }
+  }
+}

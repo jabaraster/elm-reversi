@@ -1,0 +1,17 @@
+{
+  "projectName": "reversi",
+  "version": "3.1",
+  "frontend": "javascript",
+  "javascript": {
+    "framework": "none",
+    "config": {
+      "SourceDir": "src",
+      "DistributionDir": "dist",
+      "BuildCommand": "yarn run build",
+      "StartCommand": "yarn run start"
+    }
+  },
+  "providers": [
+    "awscloudformation"
+  ]
+}

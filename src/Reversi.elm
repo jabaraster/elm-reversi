@@ -131,10 +131,33 @@ update msg model =
         GotSavedModel value ->
             let
                 m =
-                    Json.Decode.decodeString decodeModel (Debug.log "" value)
+                    Json.Decode.decodeString decodeModel value
                         |> Result.withDefault model
             in
             ( { m | message = "復元しました" }, Cmd.none )
+
+
+type TurnState
+    = Puttable
+    | Pass
+    | GameOver
+
+
+getTurnState : Model -> TurnState
+getTurnState model =
+    let
+        puttableState =
+            getPuttableState model.turn model.board
+    in
+    if List.isEmpty puttableState.puttable then
+        if (getPuttableState (reverse model.turn) model.board).puttable |> List.isEmpty then
+            GameOver
+
+        else
+            Pass
+
+    else
+        Puttable
 
 
 view : Model -> Html.Html Msg
@@ -151,15 +174,15 @@ view model =
         div [] <|
             (List.map (viewBoardRow <| Set.fromList <| List.map Pos.toKey puttableState.unputtable) model.board
                 ++ [ hr [] [] ]
-                ++ (if List.isEmpty puttableState.puttable then
-                        if (getPuttableState (reverse model.turn) model.board).puttable |> List.isEmpty then
+                ++ (case getTurnState model of
+                        GameOver ->
                             [ viewGameOver ]
 
-                        else
+                        Pass ->
                             [ viewPass ]
 
-                    else
-                        []
+                        Puttable ->
+                            []
                    )
                 ++ [ div [ css [ fontSize (pct 150) ] ]
                         [ div [ css styleScore ] [ viewStone (Just Black) True, text ":", text <| String.fromInt cnt.black ]
@@ -167,13 +190,14 @@ view model =
                         ]
                    , div [] [ text "手番 : ", viewStone (Just model.turn) True ]
                    , div []
-                        [ text <|
-                            model.message
-                                ++ "[置けるセルの数："
-                                ++ (String.fromInt <| List.length puttableState.puttable)
-                                ++ "][置けないセルの数："
-                                ++ (String.fromInt <| List.length puttableState.unputtable)
-                                ++ "]"
+                        [ p []
+                            [ text <|
+                                if model.message == "" then
+                                    "\u{3000}"
+
+                                else
+                                    model.message
+                            ]
                         ]
                    , hr [] []
                    , p [] [ text "ルール参照: ", linkToRule ]
@@ -189,7 +213,7 @@ viewGameOver =
     viewInformation (rgba 100 230 100 0.3)
         [ p [ css [ fontSize (pct 120) ] ] [ text "ゲーム終了！" ]
         , button
-            [ css [ padding (px 4) ]
+            [ css [ padding (px 4), fontSize (pct 120) ]
             , onClick OnAgain
             ]
             [ text "もう１度遊ぶ" ]
@@ -201,10 +225,7 @@ viewPass =
     viewInformation (rgba 255 255 255 0.3)
         [ p [] [ text "置ける場所がありません。" ]
         , button
-            [ css
-                [ fontSize (pct 130)
-                , padding (px 4)
-                ]
+            [ css [ fontSize (pct 120) ]
             , onClick OnPass
             ]
             [ text "パス" ]
@@ -254,9 +275,7 @@ viewCell cannotPutPositions cell =
         [ css <| styleCell cell
         , onClick (OnPutStone cell.position)
         ]
-        [ span
-            []
-            [ viewStone cell.stone (Set.member (Pos.toKey cell.position) cannotPutPositions) ]
+        [ viewStone cell.stone (Set.member (Pos.toKey cell.position) cannotPutPositions)
         ]
     )
 
@@ -264,36 +283,63 @@ viewCell cannotPutPositions cell =
 viewStone : Maybe Stone -> Bool -> Html Msg
 viewStone mStone unPuttable =
     let
+        blackColor =
+            rgba 20 20 20 1
+
+        whiteColor =
+            rgba 230 230 230 1
+
+        stoneStyle =
+            [ borderRadius (pct 50)
+            , boxSizing borderBox
+            , Css.width (px stoneSize)
+            , Css.height (px stoneSize)
+            , display inlineBlock
+            , transform <| translateY (px 4)
+            ]
+
+        textColor =
+            color (rgba 150 150 150 0.8)
+
         fs =
-            fontSize (px 40)
+            fontSize (px textSize)
     in
     case mStone of
         Nothing ->
             if unPuttable then
-                span [ css [ color (rgba 150 150 150 0.8), fontSize (px 24) ] ] [ text "×" ]
+                span [ css [ textColor, fs ] ] [ text "×" ]
 
             else
-                span [ css [ color (rgba 150 150 150 0.8), fontSize (px 24) ] ] [ text "□" ]
+                span
+                    [ css
+                        [ textColor
+                        , fs
+                        , display inlineBlock
+                        , hover [ transform <| scale 1.3 ]
+                        , Transitions.transition [ Transitions.transform2 100 0 ]
+                        ]
+                    ]
+                    [ text "□" ]
 
         Just Black ->
-            span
-                [ css
-                    [ Css.property "-webkit-text-stroke" "1px rgba(230, 230, 230, .8)"
-                    , color (rgba 20 20 20 1)
-                    , fs
+            div
+                [ css <|
+                    [ border3 (px 1) solid whiteColor
+                    , backgroundColor blackColor
                     ]
+                        ++ stoneStyle
                 ]
-                [ text "●" ]
+                []
 
         Just White ->
-            span
-                [ css
-                    [ Css.property "-webkit-text-stroke" "1px rgba(30, 30, 30, .8)"
-                    , color (rgba 240 240 240 1)
-                    , fs
+            div
+                [ css <|
+                    [ border3 (px 1) solid blackColor
+                    , backgroundColor whiteColor
                     ]
+                        ++ stoneStyle
                 ]
-                [ text "●" ]
+                []
 
 
 styleScore : List Style
@@ -303,37 +349,62 @@ styleScore =
     ]
 
 
+cellSize : Float
+cellSize =
+    40
+
+
+stoneSize : Float
+stoneSize =
+    cellSize - 10
+
+
+textSize : Float
+textSize =
+    24
+
+
 styleCell : Cell -> List Style
 styleCell cell =
-    [ Css.width (px 48)
-    , Css.height (px 48)
+    let
+        bw =
+            px 1
+
+        bs =
+            solid
+
+        bc =
+            rgba 200 200 200 0.3
+    in
+    [ Css.width (px cellSize)
+    , Css.height (px cellSize)
+    , boxSizing borderBox
     , display inlineBlock
     , textAlign center
-    , fontSize (pct 200)
+    , fontSize (pct 150)
     , cursor pointer
+    , borderBottom3 bw bs bc
+    , borderRight3 bw bs bc
+    , backgroundColor (rgba 0 50 0 1)
     ]
+        ++ (if cell.position.x == 0 then
+                [ borderLeft3 bw bs bc ]
+
+            else
+                []
+           )
+        ++ (if cell.position.y == 0 then
+                [ borderTop3 bw bs bc ]
+
+            else
+                []
+           )
         ++ (case cell.stone of
                 Nothing ->
                     [ color (rgba 150 150 150 0.5) ]
 
-                Just Black ->
-                    [ textShadow4 (px 1) (px 2) (px 10) (rgba 255 255 255 0.3)
-                    , color (rgba 20 20 20 1)
-                    ]
-
-                Just White ->
-                    [ textShadow4 (px 1) (px 2) (px 10) (rgba 255 255 255 0.3)
-                    , color (rgba 240 240 240 1)
-                    ]
-           )
-        ++ (case cell.stone of
-                Just _ ->
+                _ ->
                     []
-
-                Nothing ->
-                    [ hover [ transform <| scale 1.2 ]
-                    , Transitions.transition [ Transitions.transform2 100 0 ]
-                    ]
            )
 
 

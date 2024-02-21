@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "format": "yarn prettier --write src && yarn elm-format --yes src && yarn elm-format --yes tests",
-    "format-dev": "yarn run format && yarn parcel --port 4333 src/reversi.html",
+    "dev": "yarn parcel --port 4333 src/reversi.html",
+    "format-dev": "yarn run format && yarn dev",
     "build": "yarn parcel build src/reversi.html",
     "test-watch": "yarn elm-test tests/*Tests.elm --watch"
   },
