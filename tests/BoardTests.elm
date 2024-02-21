@@ -1,3 +1,4 @@
+module Main exposing (buildBoard, emptyBoard, suite)
 
 import Board exposing (..)
 import Expect exposing (equal)
@@ -129,4 +130,3 @@ emptyBoard =
         )
     <|
         List.range 0 7
-
